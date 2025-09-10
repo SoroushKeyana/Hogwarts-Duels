@@ -4,23 +4,33 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">Welcome, {{ profile.user.username }} ({{ profile.house }})</h2>
+        <p class="card-text">Wins: {{ profile.wins }} | Losses: {{ profile.losses }} | House Points: {{ profile.house_points }}</p>
+        <a href="{% url 'profile' profile.user.username %}" class="btn btn-primary">View Profile</a>
+      </div>
+    </div>
 
+    <div class="card mt-4">
+      <div class="card-body">
+        <h3 class="card-title">Actions</h3>
+        <a href="{% url 'start_duel' %}" class="btn btn-primary">Start Random Duel</a>
+        <a href="{% url 'my_duels' %}" class="btn btn-info">My Active Duels</a>
+      </div>
+    </div>
+  </div>
 
-<h2>Welcome, {{ profile.user.username }} ({{ profile.house }})</h2>
-<a href="{% url 'profile' profile.user.username %}">Profile</a>
-
-<p>Wins: {{ profile.wins }} | Losses: {{ profile.losses }} | House Points: {{ profile.house_points }}</p>
-<form method="post" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button type="submit">Logout</button>
-</form>
-<h3>Search Users</h3>
-<input type="text" id="searchBox" placeholder="Search by username">
-<ul id="searchResults"></ul>
-
-    <a href="{% url 'start_duel' %}" class="btn btn-primary mt-3">Start Random Duel</a>
-    <a href="{% url 'my_duels' %}" class="btn btn-info mt-3">My Active Duels</a>
-
-
-
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">Search Users</h3>
+        <input type="text" id="searchBox" class="form-control" placeholder="Search by username">
+        <ul id="searchResults" class="list-group mt-3"></ul>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

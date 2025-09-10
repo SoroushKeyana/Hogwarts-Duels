@@ -3,34 +3,45 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-
-<h1>{{ profile.user.username }}</h1>
-
-<p>House: {{ profile.house }}</p>
-
-{% if user.is_authenticated and user != profile.user %}
-    <form action="{% url 'start_duel_with_user' profile.user.id %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Challenge to a Duel</button>
-    </form>
-{% endif %}
-
-
-<h2>Followed Users</h2>
-{% for u in following_users %}
-    <p>
-        <a href="{% url 'profile' u.username %}">{{ u.username }}</a>
-        {% if user.is_authenticated and user != u %}
-            <form action="{% url 'start_duel_with_user' u.id %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-primary">Challenge</button>
-            </form>
-            <button class="btn btn-sm btn-danger" onclick="unfollow({{ u.id }}, this)">Unfollow</button>
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <h1 class="card-title">{{ profile.user.username }}</h1>
+        <p class="card-text">House: {{ profile.house }}</p>
+        {% if user.is_authenticated and user != profile.user %}
+          <form action="{% url 'start_duel_with_user' profile.user.id %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary">Challenge to a Duel</button>
+          </form>
         {% endif %}
-    </p>
-{% empty %}
-    <p>Not following anyone yet.</p>
-{% endfor %}
-
-
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">Followed Users</h2>
+        <ul class="list-group list-group-flush">
+          {% for u in following_users %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <a href="{% url 'profile' u.username %}">{{ u.username }}</a>
+              {% if user.is_authenticated and user != u %}
+                <div>
+                  <form action="{% url 'start_duel_with_user' u.id %}" method="post" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-primary">Challenge</button>
+                  </form>
+                  <button class="btn btn-sm btn-danger" onclick="unfollow({{ u.id }}, this)">Unfollow</button>
+                </div>
+              {% endif %}
+            </li>
+          {% empty %}
+            <li class="list-group-item">Not following anyone yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

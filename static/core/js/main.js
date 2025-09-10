@@ -11,11 +11,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     results.innerHTML = '';
                     data.forEach(user => {
                         const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        const userLink = document.createElement('a');
+                        userLink.href = `/profile/${user.username}/`;
+                        userLink.textContent = user.username;
+                        li.appendChild(userLink);
+
+                        const buttonDiv = document.createElement('div');
                         if (user.is_following) {
-                            li.innerHTML = `${user.username} <button onclick="unfollow(${user.id}, this)">Unfollow</button>`;
+                            const unfollowButton = document.createElement('button');
+                            unfollowButton.className = 'btn btn-sm btn-danger';
+                            unfollowButton.textContent = 'Unfollow';
+                            unfollowButton.onclick = () => unfollow(user.id, unfollowButton);
+                            buttonDiv.appendChild(unfollowButton);
                         } else {
-                            li.innerHTML = `${user.username} <button onclick="follow(${user.id}, this)">Follow</button>`;
+                            const followButton = document.createElement('button');
+                            followButton.className = 'btn btn-sm btn-primary';
+                            followButton.textContent = 'Follow';
+                            followButton.onclick = () => follow(user.id, followButton);
+                            buttonDiv.appendChild(followButton);
                         }
+                        li.appendChild(buttonDiv);
                         results.appendChild(li);
                     });
                 });

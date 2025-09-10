@@ -2,28 +2,44 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Duel</h2>
-    <p><strong>{{ duel.challenger.username }}</strong> HP: <span id="challenger_hp">{{ duel.challenger_health }}</span></p>
-    <p><strong>{{ duel.opponent.username }}</strong> HP: <span id="opponent_hp">{{ duel.opponent_health }}</span></p>
+    <div class="card">
+        <div class="card-header text-center">
+            <h2>Duel</h2>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-6">
+                    <h3>{{ duel.challenger.username }}</h3>
+                    <p>HP: <span id="challenger_hp" class="badge bg-success">{{ duel.challenger_health }}</span></p>
+                </div>
+                <div class="col-md-6">
+                    <h3>{{ duel.opponent.username }}</h3>
+                    <p>HP: <span id="opponent_hp" class="badge bg-success">{{ duel.opponent_health }}</span></p>
+                </div>
+            </div>
 
-    <div id="duel_active_section" style="display: {% if duel.status != 'accepted' %}none{% else %}block{% endif %};">
-        <p id="turn_text">Current Turn: {{ duel.current_turn.username }}</p>
+            <div id="duel_active_section" style="display: {% if duel.status != 'accepted' %}none{% else %}block{% endif %};" class="text-center mt-4">
+                <p id="turn_text" class="lead">Current Turn: {{ duel.current_turn.username }}</p>
 
-        <form id="spell_form" method="post" action="{% url 'attack' duel.id %}" style="display: {% if duel.current_turn != user %}none{% else %}block{% endif %};">
-            {% csrf_token %}
-            <select name="spell">
-                <option value="Stupefy">Stupefy (-3)</option>
-                <option value="Expelliarmus">Expelliarmus (-2)</option>
-                <option value="Sectumsempra">Sectumsempra (-4)</option>
-            </select>
-            <button type="submit">Cast Spell</button>
-        </form>
+                <form id="spell_form" method="post" action="{% url 'attack' duel.id %}" style="display: {% if duel.current_turn != user %}none{% else %}block{% endif %};">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <select name="spell" class="form-select">
+                            <option value="Stupefy">Stupefy (-3)</option>
+                            <option value="Expelliarmus">Expelliarmus (-2)</option>
+                            <option value="Sectumsempra">Sectumsempra (-4)</option>
+                        </select>
+                        <button type="submit" class="btn btn-danger">Cast Spell</button>
+                    </div>
+                </form>
 
-        <p id="waiting_message" style="display: {% if duel.current_turn == user %}none{% else %}block{% endif %};">Waiting for opponent...</p>
-    </div>
+                <p id="waiting_message" style="display: {% if duel.current_turn == user %}none{% else %}block{% endif %};">Waiting for opponent...</p>
+            </div>
 
-    <div id="duel_ended_section" style="display: {% if duel.status != 'finished' %}none{% else %}block{% endif %};">
-        <h3>🏆 Winner: <span id="winner_username">{{ duel.winner.username }}</span></h3>
+            <div id="duel_ended_section" style="display: {% if duel.status != 'finished' %}none{% else %}block{% endif %};" class="text-center mt-4">
+                <h3>🏆 Winner: <span id="winner_username">{{ duel.winner.username }}</span></h3>
+            </div>
+        </div>
     </div>
 </div>
 

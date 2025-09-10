@@ -1,3 +1,8 @@
-h2{
-    background-color: red !important;
+body {
+    background-color: #f8f9fa;
+}
+
+.footer {
+    bottom: 0;
+    width: 100%;
 }
