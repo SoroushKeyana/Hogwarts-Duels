@@ -43,6 +43,7 @@ class Duel(models.Model):
         ('accepted', 'Accepted'),
         ('declined', 'Declined'),
         ('finished', 'Finished'),
+        ('cancelled', 'Cancelled'),
     )
 
     challenger = models.ForeignKey(User, on_delete=models.CASCADE, related_name="duels_started")

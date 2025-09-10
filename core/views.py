@@ -210,7 +210,10 @@ def my_duels(request):
         Q(challenger=request.user) | Q(opponent=request.user)
     ).exclude(status='pending')
 
-    return render(request, "my_duels.html", {"duels": duels})
+    active_duels = duels.filter(status='accepted')
+    ended_duels = duels.filter(status__in=['finished', 'declined', 'cancelled']).order_by('-updated_at')
+
+    return render(request, "my_duels.html", {"active_duels": active_duels, "ended_duels": ended_duels})
 
 
 @login_required
@@ -236,3 +239,21 @@ def decline_duel(request, duel_id):
     duel.status = 'declined'
     duel.save()
     return redirect('dashboard')
+
+
+@login_required
+@require_POST
+def end_duel(request, duel_id):
+    duel = get_object_or_404(Duel, id=duel_id)
+
+    if request.user != duel.challenger and request.user != duel.opponent:
+        return HttpResponseForbidden("You are not a participant in this duel.")
+
+    duel.status = 'cancelled'
+    if request.user == duel.challenger:
+        duel.winner = duel.opponent
+    else:
+        duel.winner = duel.challenger
+    duel.save()
+
+    return redirect('my_duels')

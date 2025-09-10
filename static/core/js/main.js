@@ -31,6 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             followButton.onclick = () => follow(user.id, followButton);
                             buttonDiv.appendChild(followButton);
                         }
+
+                        const challengeButton = document.createElement('a');
+                        challengeButton.className = 'btn btn-sm btn-warning ms-2'; // Added ms-2 for margin-left
+                        challengeButton.textContent = 'Challenge';
+                        challengeButton.href = `/duel/start/${user.id}/`;
+                        buttonDiv.appendChild(challengeButton);
+
                         li.appendChild(buttonDiv);
                         results.appendChild(li);
                     });
