@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>New Duel Challenge!</h2>
+    <p>You have been challenged to a duel by {{ duel.challenger.username }}.</p>
+    <form action="{% url 'accept_duel' duel.id %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Accept</button>
+    </form>
+    <form action="{% url 'decline_duel' duel.id %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Decline</button>
+    </form>
+</div>
+{% endblock %}

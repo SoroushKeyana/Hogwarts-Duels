@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Duel Declined</h2>
+    <p>{{ duel.opponent.username }} has declined your duel challenge.</p>
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+</div>
+{% endblock %}

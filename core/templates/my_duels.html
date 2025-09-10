@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Active Duels</h2>
+    <ul>
+        {% for duel in duels %}
+            <li>
+                Duel: {{ duel.challenger.username }} vs {{ duel.opponent.username }}
+                {% if duel.current_turn == user %}
+                    <span class="badge bg-success">Your Turn!</span>
+                {% else %}
+                    <span class="badge bg-warning">Waiting...</span>
+                {% endif %}
+                <a href="{% url 'duel_view' duel.id %}" class="btn btn-primary btn-sm">Join Duel</a>
+            </li>
+        {% empty %}
+            <li>No active duels.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

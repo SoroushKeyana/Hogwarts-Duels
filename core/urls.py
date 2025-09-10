@@ -11,4 +11,15 @@ urlpatterns = [
     path('search/', views.search_users, name='search_users'),
     path('follow/<int:user_id>/', views.follow_user, name='follow_user'),
     path('unfollow/<int:user_id>/', views.unfollow_user, name='unfollow_user'),
+    path("duel/start/", views.start_duel, name="start_duel"),
+    path("duel/start/<int:user_id>/", views.start_duel, name="start_duel_with_user"),
+    path("duel/<int:duel_id>/", views.duel_view, name="duel_view"),
+    path("duel/<int:duel_id>/wait/", views.wait_for_opponent, name="wait_for_opponent"),
+    path("duel/<int:duel_id>/attack/", views.attack, name="attack"),
+    path("duel/<int:duel_id>/status/", views.duel_status, name="duel_status"),
+    path("duel/<int:duel_id>/accept/", views.accept_duel, name="accept_duel"),
+    path("duel/<int:duel_id>/decline/", views.decline_duel, name="decline_duel"),
+    path("duels/", views.my_duels, name="my_duels"),
+    path('duels/invitations/', views.get_duel_invitations, name='get_duel_invitations'),
 ]
+

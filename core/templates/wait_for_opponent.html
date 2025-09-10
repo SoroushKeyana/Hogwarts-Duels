@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Waiting for Opponent</h2>
+    <p>You have challenged {{ duel.opponent.username }}. Waiting for them to accept...</p>
+</div>
+
+<script>
+const duelId = {{ duel.id }};
+
+function checkDuelStatus() {
+    fetch(`/duel/${duelId}/status/`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'accepted') {
+            window.location.href = `/duel/${duelId}/`;
+        } else if (data.status === 'declined') {
+            window.location.href = `/duel/${duelId}/declined/`;
+        }
+    })
+    .catch(err => console.error('Error fetching duel status:', err));
+}
+
+setInterval(checkDuelStatus, 2000);
+</script>
+{% endblock %}

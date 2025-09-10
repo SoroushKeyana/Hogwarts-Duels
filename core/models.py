@@ -35,3 +35,31 @@ class Follow(models.Model):
 
     def __str__(self):
         return f"{self.follower.username} follows {self.following.username}"
+    
+
+class Duel(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+        ('finished', 'Finished'),
+    )
+
+    challenger = models.ForeignKey(User, on_delete=models.CASCADE, related_name="duels_started")
+    opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="duels_received")
+    
+    challenger_health = models.IntegerField(default=10)
+    opponent_health = models.IntegerField(default=10)
+    
+    current_turn = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="duel_turns")
+    
+    winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="duels_won")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Duel: {self.challenger.username} vs {self.opponent.username} ({self.status})"
+
+    

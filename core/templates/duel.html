@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Duel</h2>
+    <p><strong>{{ duel.challenger.username }}</strong> HP: <span id="challenger_hp">{{ duel.challenger_health }}</span></p>
+    <p><strong>{{ duel.opponent.username }}</strong> HP: <span id="opponent_hp">{{ duel.opponent_health }}</span></p>
+
+    <div id="duel_active_section" style="display: {% if duel.status != 'accepted' %}none{% else %}block{% endif %};">
+        <p id="turn_text">Current Turn: {{ duel.current_turn.username }}</p>
+
+        <form id="spell_form" method="post" action="{% url 'attack' duel.id %}" style="display: {% if duel.current_turn != user %}none{% else %}block{% endif %};">
+            {% csrf_token %}
+            <select name="spell">
+                <option value="Stupefy">Stupefy (-3)</option>
+                <option value="Expelliarmus">Expelliarmus (-2)</option>
+                <option value="Sectumsempra">Sectumsempra (-4)</option>
+            </select>
+            <button type="submit">Cast Spell</button>
+        </form>
+
+        <p id="waiting_message" style="display: {% if duel.current_turn == user %}none{% else %}block{% endif %};">Waiting for opponent...</p>
+    </div>
+
+    <div id="duel_ended_section" style="display: {% if duel.status != 'finished' %}none{% else %}block{% endif %};">
+        <h3>🏆 Winner: <span id="winner_username">{{ duel.winner.username }}</span></h3>
+    </div>
+</div>
+
+<script>
+const duelId = {{ duel.id }};
+const currentUser = "{{ user.username }}";
+let pollingInterval;
+
+function checkDuel() {
+    fetch(`/duel/${duelId}/status/`)
+    .then(res => res.json())
+    .then(data => {
+        // Update health
+        document.getElementById('challenger_hp').innerText = data.challenger_health;
+        document.getElementById('opponent_hp').innerText = data.opponent_health;
+
+        if (data.status === 'accepted') {
+            // Update current turn
+            document.getElementById('turn_text').innerText = "Current Turn: " + data.current_turn;
+
+            // Toggle form and waiting message
+            if (data.current_turn === currentUser) {
+                document.getElementById('spell_form').style.display = 'block';
+                document.getElementById('waiting_message').style.display = 'none';
+            } else {
+                document.getElementById('spell_form').style.display = 'none';
+                document.getElementById('waiting_message').style.display = 'block';
+            }
+        } else if (data.status === 'finished') {
+            // Duel ended
+            document.getElementById('duel_active_section').style.display = 'none';
+            document.getElementById('winner_username').innerText = data.winner;
+            document.getElementById('duel_ended_section').style.display = 'block';
+            if (pollingInterval) {
+                clearInterval(pollingInterval); // Stop polling
+            }
+        }
+    })
+    .catch(err => {
+        console.error('Error fetching duel status:', err);
+        if (pollingInterval) {
+            clearInterval(pollingInterval); // Stop polling on error
+        }
+    });
+}
+
+// Poll every 2 seconds
+if (document.getElementById('duel_active_section').style.display === 'block') {
+    pollingInterval = setInterval(checkDuel, 2000);
+}
+</script>
+{% endblock %}

@@ -4,15 +4,33 @@
 
 {% block content %}
 
-<h1>{{ user.username }}</h1>
+<h1>{{ profile.user.username }}</h1>
 
 <p>House: {{ profile.house }}</p>
 
+{% if user.is_authenticated and user != profile.user %}
+    <form action="{% url 'start_duel_with_user' profile.user.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Challenge to a Duel</button>
+    </form>
+{% endif %}
 
-<h2>Your friends</h2>
-{% for user in following_users %}
-    <p>{{ user.username }} <button onclick="unfollow({{ user.id }}, this)">Unfollow</button>
+
+<h2>Followed Users</h2>
+{% for u in following_users %}
+    <p>
+        <a href="{% url 'profile' u.username %}">{{ u.username }}</a>
+        {% if user.is_authenticated and user != u %}
+            <form action="{% url 'start_duel_with_user' u.id %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-primary">Challenge</button>
+            </form>
+            <button class="btn btn-sm btn-danger" onclick="unfollow({{ u.id }}, this)">Unfollow</button>
+        {% endif %}
     </p>
+{% empty %}
+    <p>Not following anyone yet.</p>
 {% endfor %}
+
 
 {% endblock %}
