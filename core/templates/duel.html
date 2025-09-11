@@ -50,7 +50,46 @@
 <script>
 const duelId = {{ duel.id }};
 const currentUser = "{{ user.username }}";
+const SPELL_DATA = JSON.parse('{{ spell_data_json|escapejs }}');
 let pollingInterval;
+
+const spellInput = document.getElementById('spell_input');
+const spellSuggestions = document.createElement('div');
+spellSuggestions.id = 'spell_suggestions';
+spellSuggestions.className = 'list-group';
+spellInput.parentNode.insertBefore(spellSuggestions, spellInput.nextSibling);
+
+spellInput.addEventListener('input', () => {
+    const query = spellInput.value.toLowerCase();
+    spellSuggestions.innerHTML = '';
+
+    if (query.length === 0) {
+        return;
+    }
+
+    const matchingSpells = Object.keys(SPELL_DATA).filter(spell => 
+        spell.toLowerCase().startsWith(query)
+    );
+
+    matchingSpells.forEach(spell => {
+        const suggestionItem = document.createElement('button');
+        suggestionItem.type = 'button';
+        suggestionItem.className = 'list-group-item list-group-item-action';
+        suggestionItem.innerText = spell;
+        suggestionItem.addEventListener('click', () => {
+            spellInput.value = spell;
+            spellSuggestions.innerHTML = ''; // Clear suggestions
+        });
+        spellSuggestions.appendChild(suggestionItem);
+    });
+});
+
+// Clear suggestions when input loses focus (with a slight delay to allow click on suggestion)
+spellInput.addEventListener('blur', () => {
+    setTimeout(() => {
+        spellSuggestions.innerHTML = '';
+    }, 100);
+});
 
 function checkDuel() {
     fetch(`/duel/${duelId}/status/`)

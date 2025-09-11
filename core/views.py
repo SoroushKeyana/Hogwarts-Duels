@@ -11,6 +11,7 @@ import random
 
 
 import random
+import json
 
 
 SPELL_DATA = {
@@ -181,7 +182,7 @@ def duel_view(request, duel_id):
         return redirect('duel_cancelled', duel_id=duel.id)
 
     print(f"Rendering duel.html for duel {duel.id} with status: {duel.status}")
-    return render(request, "duel.html", {"duel": duel})
+    return render(request, "duel.html", {"duel": duel, "spell_data_json": json.dumps(SPELL_DATA)})
 
 
 @login_required
@@ -213,8 +214,7 @@ def attack(request, duel_id):
 
     if is_attack_turn:
         # This is an attack turn
-        if spell_data["type"] != "attack":
-            return HttpResponseForbidden("You must cast an attack spell.")
+        # No strict spell type check here, allow any spell to be cast
 
         duel.last_spell_cast = actual_spell_name
         duel.last_defender_spell = None # Clear previous defender spell
@@ -223,8 +223,7 @@ def attack(request, duel_id):
 
     else:
         # This is a defense turn
-        if spell_data["type"] == "attack":
-            return HttpResponseForbidden("You must cast a defense or utility spell.")
+        # No strict spell type check here, allow any spell to be cast
 
         attacking_spell_data = SPELL_DATA[duel.last_spell_cast]
         damage_dealt = attacking_spell_data["power"]
