@@ -20,15 +20,12 @@
 
             <div id="duel_active_section" style="display: {% if duel.status != 'accepted' %}none{% else %}block{% endif %};" class="text-center mt-4">
                 <p id="turn_text" class="lead">Current Turn: {{ duel.current_turn.username }}</p>
+                <p id="last_spell_info" class="text-muted">{% if duel.last_spell_cast %}Last Attack: {{ duel.last_spell_cast }}{% endif %}{% if duel.last_defender_spell %} | Last Defense: {{ duel.last_defender_spell }}{% endif %}</p>
 
                 <form id="spell_form" method="post" action="{% url 'attack' duel.id %}" style="display: {% if duel.current_turn != user %}none{% else %}block{% endif %};">
                     {% csrf_token %}
                     <div class="input-group mb-3">
-                        <select name="spell" class="form-select">
-                            <option value="Stupefy">Stupefy (-3)</option>
-                            <option value="Expelliarmus">Expelliarmus (-2)</option>
-                            <option value="Sectumsempra">Sectumsempra (-4)</option>
-                        </select>
+                        <input type="text" name="spell" id="spell_input" class="form-control" placeholder="Enter your spell...">
                         <button type="submit" class="btn btn-danger">Cast Spell</button>
                     </div>
                 </form>
@@ -40,7 +37,7 @@
                 <h3>🏆 Winner: <span id="winner_username">{{ duel.winner.username }}</span></h3>
             </div>
 
-            <div class="text-center mt-4">
+            <div id="end_duel_section" class="text-center mt-4" style="display: {% if duel.status == 'accepted' %}block{% else %}none{% endif %};">  
                 <form action="{% url 'end_duel' duel.id %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-warning">End Duel</button>
@@ -59,9 +56,23 @@ function checkDuel() {
     fetch(`/duel/${duelId}/status/`)
     .then(res => res.json())
     .then(data => {
+        console.log('Duel Status:', data.status);
         // Update health
         document.getElementById('challenger_hp').innerText = data.challenger_health;
         document.getElementById('opponent_hp').innerText = data.opponent_health;
+
+        // Update last spell info
+        const lastSpellInfo = document.getElementById('last_spell_info');
+        if (lastSpellInfo) {
+            let infoText = '';
+            if (data.last_spell_cast) {
+                infoText += `Last Attack: ${data.last_spell_cast}`;
+            }
+            if (data.last_defender_spell) {
+                infoText += `${data.last_spell_cast ? ' | ' : ''}Last Defense: ${data.last_defender_spell}`;
+            }
+            lastSpellInfo.innerText = infoText;
+        }
 
         if (data.status === 'accepted') {
             // Update current turn
@@ -80,9 +91,19 @@ function checkDuel() {
             document.getElementById('duel_active_section').style.display = 'none';
             document.getElementById('winner_username').innerText = data.winner;
             document.getElementById('duel_ended_section').style.display = 'block';
+            const endDuelSection = document.getElementById('end_duel_section');
+            if (endDuelSection) {
+                endDuelSection.style.display = 'none';
+            }
             if (pollingInterval) {
                 clearInterval(pollingInterval); // Stop polling
             }
+        } else if (data.status === 'cancelled') {
+            const endDuelSection = document.getElementById('end_duel_section');
+            if (endDuelSection) {
+                endDuelSection.style.display = 'none';
+            }
+            window.location.href = `/duel/${duelId}/cancelled/`;
         }
     })
     .catch(err => {

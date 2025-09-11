@@ -34,6 +34,7 @@
         </thead>
         <tbody>
             {% for duel in ended_duels %}
+            {% if duel.winner %}
             <tr>
                 <td>{{ duel.challenger.username }} vs {{ duel.opponent.username }}</td>
                 <td>{{ duel.created_at|date:"M d, Y" }}</td>
@@ -48,6 +49,7 @@
                     {% endif %}
                 </td>
             </tr>
+            {% endif %}
             {% empty %}
             <tr>
                 <td colspan="4">No ended duels.</td>

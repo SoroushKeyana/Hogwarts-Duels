@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Duel Cancelled!</h4>
+        <p>Your opponent has ended the duel.</p>
+        {% if duel.winner %}
+            <p>The winner is: <strong>{{ duel.winner.username }}</strong></p>
+        {% else %}
+            <p>The duel ended without a clear winner.</p>
+        {% endif %}
+        <hr>
+        <a href="{% url 'my_duels' %}" class="btn btn-primary">Go to My Duels</a>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Go to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

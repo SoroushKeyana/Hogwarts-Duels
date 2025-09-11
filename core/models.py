@@ -52,6 +52,9 @@ class Duel(models.Model):
     challenger_health = models.IntegerField(default=10)
     opponent_health = models.IntegerField(default=10)
     
+    last_spell_cast = models.CharField(max_length=50, null=True, blank=True)
+    last_defender_spell = models.CharField(max_length=50, null=True, blank=True)
+
     current_turn = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="duel_turns")
     
     winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="duels_won")
@@ -62,5 +65,16 @@ class Duel(models.Model):
 
     def __str__(self):
         return f"Duel: {self.challenger.username} vs {self.opponent.username} ({self.status})"
+
+class HousePoints(models.Model):
+    house = models.CharField(max_length=20, choices=HOUSES, unique=True)
+    points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.house}: {self.points} points"
+
+    class Meta:
+        verbose_name = 'House Point'
+        verbose_name_plural = 'House Points'
 
     

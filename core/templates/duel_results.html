@@ -2,14 +2,23 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Duel Results</h2>
-    {% if duel.status == 'finished' %}
-        <h3>🏆 Winner: {{ duel.winner.username }}</h3>
-    {% elif duel.status == 'declined' %}
-        <p>The duel was declined.</p>
-    {% else %}
-        <p>The duel is not finished yet.</p>
-    {% endif %}
-    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+    <div class="card text-center">
+        <div class="card-header">
+            <h2>Duel Results</h2>
+        </div>
+        <div class="card-body">
+            {% if duel.status == 'finished' %}
+                <h3 class="card-title text-success">🏆 Winner: {{ duel.winner.username }}</h3>
+                <p class="card-text">Congratulations to {{ duel.winner.username }} for winning the duel!</p>
+            {% elif duel.status == 'declined' %}
+                <h3 class="card-title text-danger">Duel Declined</h3>
+                <p class="card-text">This duel was declined.</p>
+            {% else %}
+                <h3 class="card-title">Duel Status: {{ duel.status|capfirst }}</h3>
+                <p class="card-text">The duel is not finished yet.</p>
+            {% endif %}
+            <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Back to Dashboard</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

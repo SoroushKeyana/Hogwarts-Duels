@@ -16,7 +16,7 @@ function checkDuelStatus() {
         if (data.status === 'accepted') {
             window.location.href = `/duel/${duelId}/`;
         } else if (data.status === 'declined') {
-            window.location.href = `/duel/${duelId}/declined/`;
+            window.location.href = `/duel/${duelId}/declined_info/`;
         }
     })
     .catch(err => console.error('Error fetching duel status:', err));

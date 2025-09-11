@@ -3,17 +3,40 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth import login, authenticate
-from .models import UserProfile, HOUSES, Follow, Duel
+from .models import UserProfile, HOUSES, Follow, Duel, HousePoints
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponseForbidden
 from django.db import IntegrityError
 import random
 
 
-SPELLS = {
-    "Stupefy": 3,
-    "Expelliarmus": 2,
-    "Sectumsempra": 4,
+import random
+
+
+SPELL_DATA = {
+    # Attack Spells
+    "Stupefy": {"type": "attack", "power": 3, "counters": ["Protego", "Expelliarmus"], "description": "Stunning Spell"},
+    "Expelliarmus": {"type": "attack", "power": 2, "counters": ["Protego"], "description": "Disarming Charm"},
+    "Sectumsempra": {"type": "attack", "power": 4, "counters": ["Vulnera Sanentur"], "description": "Lacerating Curse"},
+    "Avada Kedavra": {"type": "attack", "power": 100, "counters": [], "description": "Killing Curse (Unblockable)", "unblockable": True},
+    "Confringo": {"type": "attack", "power": 3, "counters": ["Protego"], "description": "Blasting Curse"},
+    "Reducto": {"type": "attack", "power": 3, "counters": ["Protego"], "description": "Reductor Curse"},
+    "Bombarda": {"type": "attack", "power": 4, "counters": ["Protego"], "description": "Explosive Charm"},
+
+    # Defense Spells
+    "Protego": {"type": "defense", "power": 2, "counters": ["Stupefy", "Expelliarmus", "Confringo", "Reducto", "Bombarda"], "description": "Shield Charm"},
+    "Vulnera Sanentur": {"type": "defense", "power": 5, "counters": ["Sectumsempra"], "description": "Healing Charm"},
+    "Rennervate": {"type": "defense", "power": 1, "counters": ["Stupefy"], "description": "Reviving Charm"},
+    "Finite Incantatem": {"type": "defense", "power": 3, "counters": ["Petrificus Totalus", "Impedimenta"], "description": "General Counter-Spell"},
+
+    # Utility/Other Spells (can have minor effects or be countered)
+    "Petrificus Totalus": {"type": "utility", "power": 1, "counters": ["Finite Incantatem"], "description": "Full Body-Bind Curse"},
+    "Impedimenta": {"type": "utility", "power": 1, "counters": ["Finite Incantatem"], "description": "Impediment Jinx"},
+    "Lumos": {"type": "utility", "power": 0, "counters": [], "description": "Wand-Lighting Charm"},
+    "Nox": {"type": "utility", "power": 0, "counters": [], "description": "Disarming Charm (Lumos Counter)"},
+    "Accio": {"type": "utility", "power": 0, "counters": [], "description": "Summoning Charm"},
+    "Alohomora": {"type": "utility", "power": 0, "counters": [], "description": "Unlocking Charm"},
+    "Obliviate": {"type": "utility", "power": 0, "counters": [], "description": "Memory Charm"},
 }
 
 def register_view(request):
@@ -59,7 +82,10 @@ def login_view(request):
 @login_required
 def dashboard_view(request):
     profile = UserProfile.objects.get(user=request.user)
-    return render(request, 'dashboard.html', {'profile': profile})   
+    house_points = HousePoints.objects.all().order_by('-points')
+    following_qs = Follow.objects.filter(follower=request.user).select_related('following')
+    following_users = [f.following for f in following_qs]
+    return render(request, 'dashboard.html', {'profile': profile, 'house_points': house_points, 'following_users': following_users})   
 
 
 def profile_view(request, username):
@@ -135,7 +161,7 @@ def wait_for_opponent(request, duel_id):
     if duel.status == 'accepted':
         return redirect('duel_view', duel_id=duel.id)
     elif duel.status == 'declined':
-        return render(request, 'duel_declined.html', {'duel': duel})
+        return redirect('duel_declined_info', duel_id=duel.id)
     return render(request, 'wait_for_opponent.html', {'duel': duel})
 
 
@@ -147,9 +173,14 @@ def duel_view(request, duel_id):
             return redirect('wait_for_opponent', duel_id=duel.id)
         else:
             return render(request, 'accept_duel.html', {'duel': duel})
-    elif duel.status in ['declined', 'finished']:
+    elif duel.status == 'declined':
+        return render(request, 'duel_declined.html', {'duel': duel})
+    elif duel.status == 'finished':
         return render(request, 'duel_results.html', {'duel': duel})
+    elif duel.status == 'cancelled':
+        return redirect('duel_cancelled', duel_id=duel.id)
 
+    print(f"Rendering duel.html for duel {duel.id} with status: {duel.status}")
     return render(request, "duel.html", {"duel": duel})
 
 
@@ -157,34 +188,99 @@ def duel_view(request, duel_id):
 def attack(request, duel_id):
     duel = get_object_or_404(Duel, id=duel_id)
 
-    # Check it's the user's turn
+    # Check it's the user's turn and duel is active
     if duel.current_turn != request.user or duel.status != 'accepted':
         return HttpResponseForbidden("Not your turn or duel not active.")
 
-    # Get spell from POST
-    spell = request.POST.get("spell")
-    if spell not in SPELLS:
+    # Get spell from POST and normalize it
+    spell_name = request.POST.get("spell", "").strip()
+    spell_name_normalized = spell_name.lower()
+
+    # Find the actual spell name in SPELL_DATA (case-insensitive match)
+    actual_spell_name = None
+    for key in SPELL_DATA.keys():
+        if key.lower() == spell_name_normalized:
+            actual_spell_name = key
+            break
+
+    if not actual_spell_name:
         return HttpResponseForbidden("Invalid spell.")
 
-    damage = SPELLS[spell]
+    spell_data = SPELL_DATA[actual_spell_name]
 
-    # Apply damage
-    if duel.challenger == request.user:
-        duel.opponent_health -= damage
-        if duel.opponent_health <= 0:
-            duel.opponent_health = 0
-            duel.status = 'finished'
-            duel.winner = request.user
+    # Determine if it's an attack or defense turn
+    is_attack_turn = (duel.last_spell_cast is None)
+
+    if is_attack_turn:
+        # This is an attack turn
+        if spell_data["type"] != "attack":
+            return HttpResponseForbidden("You must cast an attack spell.")
+
+        duel.last_spell_cast = actual_spell_name
+        duel.last_defender_spell = None # Clear previous defender spell
+        # Switch turn to the opponent (defender)
+        duel.current_turn = duel.opponent if duel.challenger == request.user else duel.challenger
+
     else:
-        duel.challenger_health -= damage
+        # This is a defense turn
+        if spell_data["type"] == "attack":
+            return HttpResponseForbidden("You must cast a defense or utility spell.")
+
+        attacking_spell_data = SPELL_DATA[duel.last_spell_cast]
+        damage_dealt = attacking_spell_data["power"]
+
+        # Check for unblockable spells
+        if attacking_spell_data.get("unblockable", False):
+            # Damage is full, no defense possible
+            pass
+        # Check if defending spell counters the attacking spell
+        elif actual_spell_name in attacking_spell_data["counters"]:
+            damage_dealt = 0 # Best defense, no damage
+        # If not best defense, reduce damage by defender's spell power
+        elif spell_data["type"] == "defense":
+            damage_dealt = max(0, damage_dealt - spell_data["power"])
+        # If utility spell, no defense power, full damage
+        else:
+            pass
+
+        # Apply damage to the current player (who is defending)
+        if duel.challenger == request.user:
+            duel.challenger_health -= damage_dealt
+        else:
+            duel.opponent_health -= damage_dealt
+
+        duel.last_spell_cast = None # Clear for next attack turn
+        duel.last_defender_spell = actual_spell_name
+        # Turn switches to opponent for their attack
+        duel.current_turn = duel.opponent if duel.challenger == request.user else duel.challenger
+
+    # Check for duel end after applying damage (only after a defense turn)
+    if not is_attack_turn:
         if duel.challenger_health <= 0:
             duel.challenger_health = 0
             duel.status = 'finished'
-            duel.winner = request.user
+            duel.winner = duel.opponent # Opponent wins if challenger's health drops to 0
+        elif duel.opponent_health <= 0:
+            duel.opponent_health = 0
+            duel.status = 'finished'
+            duel.winner = duel.challenger # Challenger wins if opponent's health drops to 0
 
-    # Switch turn (if duel not over)
-    if duel.status == 'accepted':
-        duel.current_turn = duel.opponent if duel.challenger == request.user else duel.challenger
+        if duel.status == 'finished':
+            # Update wins and losses
+            winner_profile = duel.winner.userprofile
+            winner_profile.wins += 1
+            winner_profile.save()
+
+            loser = duel.challenger if duel.winner == duel.opponent else duel.opponent
+            loser_profile = loser.userprofile
+            loser_profile.losses += 1
+            loser_profile.save()
+
+            # Update house points if houses are different
+            if winner_profile.house != loser_profile.house:
+                house_points, created = HousePoints.objects.get_or_create(house=winner_profile.house)
+                house_points.points += 1
+                house_points.save()
 
     duel.save()
     return redirect("duel_view", duel_id=duel.id)
@@ -257,3 +353,15 @@ def end_duel(request, duel_id):
     duel.save()
 
     return redirect('my_duels')
+
+
+@login_required
+def duel_cancelled(request, duel_id):
+    duel = get_object_or_404(Duel, id=duel_id)
+    return render(request, 'duel_cancelled.html', {'duel': duel})
+
+
+@login_required
+def duel_declined_info(request, duel_id):
+    duel = get_object_or_404(Duel, id=duel_id)
+    return render(request, 'duel_declined.html', {'duel': duel})
