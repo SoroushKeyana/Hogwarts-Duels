@@ -54,6 +54,7 @@ class Duel(models.Model):
     
     last_spell_cast = models.CharField(max_length=50, null=True, blank=True)
     last_defender_spell = models.CharField(max_length=50, null=True, blank=True)
+    last_attack_timestamp = models.DateTimeField(null=True, blank=True)
 
     current_turn = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="duel_turns")
     

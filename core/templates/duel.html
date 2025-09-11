@@ -20,6 +20,9 @@
 
             <div id="duel_active_section" style="display: {% if duel.status != 'accepted' %}none{% else %}block{% endif %};" class="text-center mt-4">
                 <p id="turn_text" class="lead">Current Turn: {{ duel.current_turn.username }}</p>
+                <div id="timer_section" style="display: none;">
+                    <p>Time to defend: <span id="timer" class="badge bg-warning">10</span></p>
+                </div>
                 <p id="last_spell_info" class="text-muted">{% if duel.last_spell_cast %}Last Attack: {{ duel.last_spell_cast }}{% endif %}{% if duel.last_defender_spell %} | Last Defense: {{ duel.last_defender_spell }}{% endif %}</p>
 
                 <form id="spell_form" method="post" action="{% url 'attack' duel.id %}" style="display: {% if duel.current_turn != user %}none{% else %}block{% endif %};">
@@ -52,6 +55,7 @@ const duelId = {{ duel.id }};
 const currentUser = "{{ user.username }}";
 const SPELL_DATA = JSON.parse('{{ spell_data_json|escapejs }}');
 let pollingInterval;
+let defenseTimerInterval;
 
 const spellInput = document.getElementById('spell_input');
 const spellSuggestions = document.createElement('div');
@@ -91,6 +95,42 @@ spellInput.addEventListener('blur', () => {
     }, 100);
 });
 
+function startDefenseTimer(timestamp) {
+    const timerEl = document.getElementById('timer');
+    const timerSection = document.getElementById('timer_section');
+    timerSection.style.display = 'block';
+
+    const endTime = new Date(timestamp).getTime() + 10000;
+
+    if (defenseTimerInterval) {
+        clearInterval(defenseTimerInterval);
+    }
+
+    defenseTimerInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = endTime - now;
+        const seconds = Math.ceil(distance / 1000);
+
+        if (distance < 0) {
+            clearInterval(defenseTimerInterval);
+            timerEl.innerText = "0";
+            // Submit form with timeout
+            spellInput.value = '_TIMEOUT_';
+            document.getElementById('spell_form').submit();
+        } else {
+            timerEl.innerText = seconds;
+        }
+    }, 1000);
+}
+
+function stopDefenseTimer() {
+    if (defenseTimerInterval) {
+        clearInterval(defenseTimerInterval);
+    }
+    const timerSection = document.getElementById('timer_section');
+    if(timerSection) timerSection.style.display = 'none';
+}
+
 function checkDuel() {
     fetch(`/duel/${duelId}/status/`)
     .then(res => res.json())
@@ -124,25 +164,30 @@ function checkDuel() {
                 if (data.turn_phase === 'defend') {
                     turnText.innerText = "Your turn to Defend!";
                     spellInput.placeholder = "Enter a defense spell...";
+                    startDefenseTimer(data.last_attack_timestamp);
                 } else { // attack phase
                     turnText.innerText = "Your turn to Attack!";
                     spellInput.placeholder = "Enter an attack spell...";
+                    stopDefenseTimer();
                 }
             } else {
                 document.getElementById('spell_form').style.display = 'none';
                 document.getElementById('waiting_message').style.display = 'block';
                 turnText.innerText = "Waiting for " + data.current_turn + " to act...";
+                stopDefenseTimer();
             }
         } else if (data.status === 'finished') {
             if (pollingInterval) {
                 clearInterval(pollingInterval); // Stop polling
             }
+            stopDefenseTimer();
             window.location.href = `/duel/${duelId}/`;
         } else if (data.status === 'cancelled') {
             const endDuelSection = document.getElementById('end_duel_section');
             if (endDuelSection) {
                 endDuelSection.style.display = 'none';
             }
+            stopDefenseTimer();
             window.location.href = `/duel/${duelId}/cancelled/`;
         }
     })
@@ -158,5 +203,9 @@ function checkDuel() {
 if (document.getElementById('duel_active_section').style.display === 'block') {
     pollingInterval = setInterval(checkDuel, 2000);
 }
+
+document.getElementById('spell_form').addEventListener('submit', () => {
+    stopDefenseTimer();
+});
 </script>
 {% endblock %}

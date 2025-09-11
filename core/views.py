@@ -8,9 +8,8 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponseForbidden
 from django.db import IntegrityError
 import random
-
-
-import random
+from django.utils import timezone
+from datetime import timedelta
 import json
 
 
@@ -193,34 +192,41 @@ def attack(request, duel_id):
         return HttpResponseForbidden("Not your turn or duel not active.")
 
     spell_name = request.POST.get("spell", "").strip()
+    is_timeout = spell_name == "_TIMEOUT_"
     actual_spell_name = next((key for key in SPELL_DATA if key.lower() == spell_name.lower()), None)
 
-    if not actual_spell_name:
+    if not actual_spell_name and not is_timeout:
         return HttpResponseForbidden("Invalid spell.")
 
-    spell_data = SPELL_DATA[actual_spell_name]
+    spell_data = SPELL_DATA.get(actual_spell_name) if actual_spell_name else {}
     is_defense_phase = duel.last_spell_cast is not None
 
     if is_defense_phase:
         # Defense phase
         attacking_spell_data = SPELL_DATA[duel.last_spell_cast]
         damage_dealt = attacking_spell_data["power"]
-
-        if not attacking_spell_data.get("unblockable", False):
+        
+        time_since_attack = timezone.now() - duel.last_attack_timestamp
+        if time_since_attack > timedelta(seconds=10) or is_timeout:
+            # Timeout or explicit timeout signal
+            pass # Full damage
+        elif not attacking_spell_data.get("unblockable", False):
             if actual_spell_name in attacking_spell_data.get("counters", []):
                 damage_dealt = 0
-            elif spell_data["type"] == "defense":
-                damage_dealt = max(0, damage_dealt - spell_data["power"])
+            elif spell_data.get("type") == "defense":
+                damage_dealt = max(0, damage_dealt - spell_data.get("power", 0))
 
         if duel.challenger == request.user:
             duel.challenger_health -= damage_dealt
         else:
             duel.opponent_health -= damage_dealt
 
-        duel.last_defender_spell = actual_spell_name
+        duel.last_defender_spell = actual_spell_name if not is_timeout else "Timed Out"
         duel.last_spell_cast = None  # Transition to attack phase
 
         if duel.challenger_health <= 0 or duel.opponent_health <= 0:
+            duel.challenger_health = max(0, duel.challenger_health)
+            duel.opponent_health = max(0, duel.opponent_health)
             duel.status = 'finished'
             duel.winner = duel.opponent if duel.challenger_health <= 0 else duel.challenger
             
@@ -243,6 +249,7 @@ def attack(request, duel_id):
         # Attack phase
         duel.last_spell_cast = actual_spell_name
         duel.last_defender_spell = None
+        duel.last_attack_timestamp = timezone.now()
         duel.current_turn = duel.opponent if duel.challenger == request.user else duel.challenger
 
     duel.save()
@@ -254,6 +261,7 @@ def duel_status(request, duel_id):
     duel = get_object_or_404(Duel, id=duel_id)
     
     turn_phase = 'defend' if duel.last_spell_cast else 'attack'
+    last_attack_timestamp_iso = duel.last_attack_timestamp.isoformat() if duel.last_attack_timestamp else None
 
     data = {
         "current_turn": duel.current_turn.username if duel.current_turn else None,
@@ -263,7 +271,8 @@ def duel_status(request, duel_id):
         "winner": duel.winner.username if duel.winner else None,
         "turn_phase": turn_phase,
         "last_spell_cast": duel.last_spell_cast,
-        "last_defender_spell": duel.last_defender_spell
+        "last_defender_spell": duel.last_defender_spell,
+        "last_attack_timestamp": last_attack_timestamp_iso
     }
     return JsonResponse(data)
 
