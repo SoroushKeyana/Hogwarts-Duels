@@ -9,7 +9,18 @@
         <div class="card-body">
             {% if duel.status == 'finished' %}
                 <h3 class="card-title text-success">🏆 Winner: {{ duel.winner.username }}</h3>
-                <p class="card-text">Congratulations to {{ duel.winner.username }} for winning the duel!</p>
+                <p class="card-text">{{ duel.winner.username.capitalize }} won the duel!</p>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>{{ duel.challenger.username.capitalize }}</h5>
+                        <p>Final Health: <span class="badge bg-danger">{{ duel.challenger_health }}</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>{{ duel.opponent.username.capitalize }}</h5>
+                        <p>Final Health: <span class="badge bg-danger">{{ duel.opponent_health }}</span></p>
+                    </div>
+                </div>
             {% elif duel.status == 'declined' %}
                 <h3 class="card-title text-danger">Duel Declined</h3>
                 <p class="card-text">This duel was declined.</p>

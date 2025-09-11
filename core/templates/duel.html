@@ -95,7 +95,7 @@ function checkDuel() {
     fetch(`/duel/${duelId}/status/`)
     .then(res => res.json())
     .then(data => {
-        console.log('Duel Status:', data.status);
+        console.log('Duel Status:', data.status, 'Phase:', data.turn_phase);
         // Update health
         document.getElementById('challenger_hp').innerText = data.challenger_health;
         document.getElementById('opponent_hp').innerText = data.opponent_health;
@@ -105,7 +105,7 @@ function checkDuel() {
         if (lastSpellInfo) {
             let infoText = '';
             if (data.last_spell_cast) {
-                infoText += `Last Attack: ${data.last_spell_cast}`;
+                infoText += `Incoming Attack: ${data.last_spell_cast}`;
             }
             if (data.last_defender_spell) {
                 infoText += `${data.last_spell_cast ? ' | ' : ''}Last Defense: ${data.last_defender_spell}`;
@@ -114,29 +114,30 @@ function checkDuel() {
         }
 
         if (data.status === 'accepted') {
-            // Update current turn
-            document.getElementById('turn_text').innerText = "Current Turn: " + data.current_turn;
+            const turnText = document.getElementById('turn_text');
+            const spellInput = document.getElementById('spell_input');
 
-            // Toggle form and waiting message
             if (data.current_turn === currentUser) {
                 document.getElementById('spell_form').style.display = 'block';
                 document.getElementById('waiting_message').style.display = 'none';
+
+                if (data.turn_phase === 'defend') {
+                    turnText.innerText = "Your turn to Defend!";
+                    spellInput.placeholder = "Enter a defense spell...";
+                } else { // attack phase
+                    turnText.innerText = "Your turn to Attack!";
+                    spellInput.placeholder = "Enter an attack spell...";
+                }
             } else {
                 document.getElementById('spell_form').style.display = 'none';
                 document.getElementById('waiting_message').style.display = 'block';
+                turnText.innerText = "Waiting for " + data.current_turn + " to act...";
             }
         } else if (data.status === 'finished') {
-            // Duel ended
-            document.getElementById('duel_active_section').style.display = 'none';
-            document.getElementById('winner_username').innerText = data.winner;
-            document.getElementById('duel_ended_section').style.display = 'block';
-            const endDuelSection = document.getElementById('end_duel_section');
-            if (endDuelSection) {
-                endDuelSection.style.display = 'none';
-            }
             if (pollingInterval) {
                 clearInterval(pollingInterval); // Stop polling
             }
+            window.location.href = `/duel/${duelId}/`;
         } else if (data.status === 'cancelled') {
             const endDuelSection = document.getElementById('end_duel_section');
             if (endDuelSection) {

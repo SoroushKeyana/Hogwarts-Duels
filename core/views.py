@@ -189,83 +189,42 @@ def duel_view(request, duel_id):
 def attack(request, duel_id):
     duel = get_object_or_404(Duel, id=duel_id)
 
-    # Check it's the user's turn and duel is active
     if duel.current_turn != request.user or duel.status != 'accepted':
         return HttpResponseForbidden("Not your turn or duel not active.")
 
-    # Get spell from POST and normalize it
     spell_name = request.POST.get("spell", "").strip()
-    spell_name_normalized = spell_name.lower()
-
-    # Find the actual spell name in SPELL_DATA (case-insensitive match)
-    actual_spell_name = None
-    for key in SPELL_DATA.keys():
-        if key.lower() == spell_name_normalized:
-            actual_spell_name = key
-            break
+    actual_spell_name = next((key for key in SPELL_DATA if key.lower() == spell_name.lower()), None)
 
     if not actual_spell_name:
         return HttpResponseForbidden("Invalid spell.")
 
     spell_data = SPELL_DATA[actual_spell_name]
+    is_defense_phase = duel.last_spell_cast is not None
 
-    # Determine if it's an attack or defense turn
-    is_attack_turn = (duel.last_spell_cast is None)
-
-    if is_attack_turn:
-        # This is an attack turn
-        # No strict spell type check here, allow any spell to be cast
-
-        duel.last_spell_cast = actual_spell_name
-        duel.last_defender_spell = None # Clear previous defender spell
-        # Switch turn to the opponent (defender)
-        duel.current_turn = duel.opponent if duel.challenger == request.user else duel.challenger
-
-    else:
-        # This is a defense turn
-        # No strict spell type check here, allow any spell to be cast
-
+    if is_defense_phase:
+        # Defense phase
         attacking_spell_data = SPELL_DATA[duel.last_spell_cast]
         damage_dealt = attacking_spell_data["power"]
 
-        # Check for unblockable spells
-        if attacking_spell_data.get("unblockable", False):
-            # Damage is full, no defense possible
-            pass
-        # Check if defending spell counters the attacking spell
-        elif actual_spell_name in attacking_spell_data["counters"]:
-            damage_dealt = 0 # Best defense, no damage
-        # If not best defense, reduce damage by defender's spell power
-        elif spell_data["type"] == "defense":
-            damage_dealt = max(0, damage_dealt - spell_data["power"])
-        # If utility spell, no defense power, full damage
-        else:
-            pass
+        if not attacking_spell_data.get("unblockable", False):
+            if actual_spell_name in attacking_spell_data.get("counters", []):
+                damage_dealt = 0
+            elif spell_data["type"] == "defense":
+                damage_dealt = max(0, damage_dealt - spell_data["power"])
 
-        # Apply damage to the current player (who is defending)
         if duel.challenger == request.user:
             duel.challenger_health -= damage_dealt
         else:
             duel.opponent_health -= damage_dealt
 
-        duel.last_spell_cast = None # Clear for next attack turn
         duel.last_defender_spell = actual_spell_name
-        # Turn switches to opponent for their attack
-        duel.current_turn = duel.opponent if duel.challenger == request.user else duel.challenger
+        duel.last_spell_cast = None  # Transition to attack phase
 
-    # Check for duel end after applying damage (only after a defense turn)
-    if not is_attack_turn:
-        if duel.challenger_health <= 0:
-            duel.challenger_health = 0
+        if duel.challenger_health <= 0 or duel.opponent_health <= 0:
             duel.status = 'finished'
-            duel.winner = duel.opponent # Opponent wins if challenger's health drops to 0
-        elif duel.opponent_health <= 0:
-            duel.opponent_health = 0
-            duel.status = 'finished'
-            duel.winner = duel.challenger # Challenger wins if opponent's health drops to 0
-
-        if duel.status == 'finished':
-            # Update wins and losses
+            duel.winner = duel.opponent if duel.challenger_health <= 0 else duel.challenger
+            
+            # Finalize winner and loser stats
             winner_profile = duel.winner.userprofile
             winner_profile.wins += 1
             winner_profile.save()
@@ -275,11 +234,16 @@ def attack(request, duel_id):
             loser_profile.losses += 1
             loser_profile.save()
 
-            # Update house points if houses are different
             if winner_profile.house != loser_profile.house:
-                house_points, created = HousePoints.objects.get_or_create(house=winner_profile.house)
+                house_points, _ = HousePoints.objects.get_or_create(house=winner_profile.house)
                 house_points.points += 1
                 house_points.save()
+        
+    else:
+        # Attack phase
+        duel.last_spell_cast = actual_spell_name
+        duel.last_defender_spell = None
+        duel.current_turn = duel.opponent if duel.challenger == request.user else duel.challenger
 
     duel.save()
     return redirect("duel_view", duel_id=duel.id)
@@ -289,12 +253,17 @@ def attack(request, duel_id):
 def duel_status(request, duel_id):
     duel = get_object_or_404(Duel, id=duel_id)
     
+    turn_phase = 'defend' if duel.last_spell_cast else 'attack'
+
     data = {
         "current_turn": duel.current_turn.username if duel.current_turn else None,
         "challenger_health": duel.challenger_health,
         "opponent_health": duel.opponent_health,
         "status": duel.status,
-        "winner": duel.winner.username if duel.winner else None
+        "winner": duel.winner.username if duel.winner else None,
+        "turn_phase": turn_phase,
+        "last_spell_cast": duel.last_spell_cast,
+        "last_defender_spell": duel.last_defender_spell
     }
     return JsonResponse(data)
 
