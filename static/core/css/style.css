@@ -1,8 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+
 body {
-    background-color: #f8f9fa;
+    font-family: 'Lora', serif;
+    background-color: #f0e6d6;
+    background-image: url('https://www.transparenttextures.com/patterns/old-parchment.png');
+    color: #4d3e32;
 }
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'IM Fell English SC', serif;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    color: #3a2e25;
+}
+
+.card {
+    background-color: #faf5ed;
+    border: 1px solid #d3c8b4;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 3px;
+}
+
+.card-header {
+    background-color: rgba(211, 200, 180, 0.3);
+    border-bottom: 1px solid #d3c8b4;
+}
+
+.btn {
+    border-radius: 2px;
+    border-width: 1px;
+    font-family: 'IM Fell English SC', serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+    background-color: #740001; /* Gryffindor Red */
+    border-color: #5c0001;
+}
+
+.btn-primary:hover {
+    background-color: #5c0001;
+    border-color: #450001;
+}
+
+.btn-warning {
+    background-color: #d3a625; /* Gryffindor Gold */
+    border-color: #b89120;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background-color: #b89120;
+    border-color: #a07e1b;
+}
+
+.btn-danger {
+    background-color: #1a472a; /* Slytherin Green */
+    border-color: #133520;
+}
+
+.btn-danger:hover {
+    background-color: #133520;
+    border-color: #0d2515;
+}
+
+a {
+    color: #0e1a40; /* Ravenclaw Blue */
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #946b2d; /* Ravenclaw Bronze */
+    text-decoration: underline;
+}
+
+.form-control {
+    background-color: #fff;
+    border: 1px solid #d3c8b4;
+    color: #4d3e32;
+    border-radius: 2px;
+}
+
+.form-control:focus {
+    background-color: #fff;
+    border-color: #946b2d;
+    box-shadow: 0 0 0 0.2rem rgba(148, 107, 45, 0.25);
+    color: #4d3e32;
+}
+
 
 .footer {
     bottom: 0;
     width: 100%;
+    padding: 1rem 0;
+    background-color: rgba(0,0,0,0.05);
+    border-top: 1px solid #d3c8b4;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+#spell_suggestions {
+    position: absolute;
+    z-index: 1000;
+    width: calc(100% - 2rem); /* Adjust based on parent padding */
+    margin-top: -0.5rem;
+}
+
+.list-group-item {
+    background-color: #faf5ed;
+    border-color: #d3c8b4;
+}
+
+.list-group-item-action:hover {
+    background-color: #f0e6d6;
+}
+
+.badge.bg-success {
+    background-color: #1a472a !important; /* Slytherin Green */
+}
+
+.badge.bg-warning {
+    background-color: #d3a625 !important; /* Gryffindor Gold */
+    color: #fff !important;
+}
+
+/* Sticky Footer Styling */
+html {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+main {
+    flex-grow: 1;
 }
