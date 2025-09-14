@@ -1,15 +1,27 @@
 
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="row">
   <div class="col-md-8">
     <div class="card">
-      <div class="card-body">
-        <h2 class="card-title">{{ profile.user.username.capitalize }}, {{ profile.house }}</h2>
-        <p class="card-text">Wins: {{ profile.wins }} | Losses: {{ profile.losses }}</p>
+      <div class="card-body d-flex align-items-center">
+        {% if profile.house == 'Gryffindor' %}
+        <img src="{% static 'core/media/Gryffindor.webp' %}" alt="House Image" class="house-image m-3">
+        {% elif profile.house == 'Hufflepuff' %}
+        <img src="{% static 'core/media/Hufflepuff.webp' %}" alt="House Image" class="house-image m-3">
+        {% elif profile.house == 'Ravenclaw' %}
+        <img src="{% static 'core/media/Ravenclaw.webp' %}" alt="House Image" class="house-image m-3">
+        {% elif profile.house == 'Slytherin' %}
+        <img src="{% static 'core/media/Slytherin.webp' %}" alt="House Image" class="house-image m-3">
+        {% endif %} 
+        <div>
+          <h2 class="card-title">{{ profile.user.username.capitalize }}, {{ profile.house }}</h2>
+          <p class="card-text">Wins: {{ profile.wins }} | Losses: {{ profile.losses }}</p>
+        </div>
+        
       </div>
     </div>
 
@@ -21,13 +33,25 @@
       </div>
     </div>
 
-    <div class="card mt-4">
-      <div class="card-body">
+    <div class="card mt-4 mb-4 houses">
+    <div class="houses-overlay">
+      <div class="card-body houses-content">
         <h3 class="card-title">House Points</h3>
-        <ul class="list-group">
+        <ul class="list-group houses-list">
           {% for hp in house_points %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              {{ hp.house }}
+              <div>
+                {% if hp.house == 'Gryffindor' %}
+                  <img src="{% static 'core/media/Gryffindor.webp' %}" alt="House Image" class="house-ranking-image">
+                {% elif hp.house == 'Hufflepuff' %}
+                  <img src="{% static 'core/media/Hufflepuff.webp' %}" alt="House Image" class="house-ranking-image">
+                {% elif hp.house == 'Ravenclaw' %}
+                  <img src="{% static 'core/media/Ravenclaw.webp' %}" alt="House Image" class="house-ranking-image">
+                {% elif hp.house == 'Slytherin' %}
+                  <img src="{% static 'core/media/Slytherin.webp' %}" alt="House Image" class="house-ranking-image">
+                {% endif %}
+                {{ hp.house }}
+              </div>
               <span class="badge bg-primary rounded-pill">{{ hp.points }}</span>
             </li>
           {% empty %}
@@ -35,6 +59,7 @@
           {% endfor %}
         </ul>
       </div>
+    </div>
     </div>
   </div>
 
@@ -45,7 +70,7 @@
         <ul class="list-group list-group-flush">
           {% for u in following_users %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <a href="{% url 'profile' u.username %}">{{ u.username }}</a>
+              <a href="{% url 'profile' u.username %}">{{ u.username.capitalize }}</a>
               {% if user.is_authenticated and user != u %}
                 <div>
                   <form action="{% url 'start_duel_with_user' u.id %}" method="post" style="display: inline;">

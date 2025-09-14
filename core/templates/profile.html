@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Profile{% endblock %}
 
@@ -7,14 +8,25 @@
   <div class="col-md-4">
     <div class="card">
       <div class="card-body text-center">
-        <h1 class="card-title">{{ profile.user.username }}</h1>
-        <p class="card-text">House: {{ profile.house }}</p>
-        {% if user.is_authenticated and user != profile.user %}
-          <form action="{% url 'start_duel_with_user' profile.user.id %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-primary">Challenge to a Duel</button>
-          </form>
-        {% endif %}
+        {% if profile.house == 'Gryffindor' %}
+        <img src="{% static 'core/media/Gryffindor.webp' %}" alt="House Image" class="profile-house-image m-3">
+        {% elif profile.house == 'Hufflepuff' %}
+        <img src="{% static 'core/media/Hufflepuff.webp' %}" alt="House Image" class="profile-house-image m-3">
+        {% elif profile.house == 'Ravenclaw' %}
+        <img src="{% static 'core/media/Ravenclaw.webp' %}" alt="House Image" class="profile-house-image m-3">
+        {% elif profile.house == 'Slytherin' %}
+        <img src="{% static 'core/media/Slytherin.webp' %}" alt="House Image" class="profile-house-image m-3">
+        {% endif %} 
+        <div>
+          <h2 class="card-title">{{ profile.user.username.capitalize }}, {{ profile.house }}</h2>
+          <p class="card-text">Wins: {{ profile.wins }} | Losses: {{ profile.losses }}</p>
+            {% if user.is_authenticated and user != profile.user %}
+              <form action="{% url 'start_duel_with_user' profile.user.id %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary">Challenge to a Duel</button>
+              </form>
+            {% endif %}
+        </div>
       </div>
     </div>
   </div>

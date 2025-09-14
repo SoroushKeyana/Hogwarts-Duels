@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Spells{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Book of Spells</h1>
+    <div class="row">
+        {% for spell, data in spell_data.items %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 spell-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ spell }}</h5>
+                    <p class="card-text"><strong>Type:</strong> {{ data.type.capitalize }}</p>
+                    <p class="card-text"><strong>Power:</strong> {{ data.power }}</p>
+                    <p class="card-text"><strong>Description:</strong> {{ data.description }}</p>
+                    {% if data.counters %}
+                    <p class="card-text"><strong>Counters:</strong> {{ data.counters|join:", " }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

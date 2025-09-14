@@ -9,6 +9,7 @@
   <meta charset="UTF-8">
 </head>
 <body>
+  <div class="body-overlay"></div>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
       <a class="navbar-brand" href="{% url 'dashboard' %}">Hogwarts Duels</a>
@@ -19,10 +20,13 @@
         <ul class="navbar-nav ms-auto">
           {% if user.is_authenticated %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'profile' user.username %}">Profile</a>
+              <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'my_duels' %}">My Duels</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'spells' %}">Spells</a>
             </li>
             <li class="nav-item">
               <form method="post" action="{% url 'logout' %}">

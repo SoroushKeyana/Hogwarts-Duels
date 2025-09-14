@@ -2,7 +2,8 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="card">
+    <div class="card duel">
+        <div class="duel-overlay">
         <div class="card-header text-center">
             <h2>Duel</h2>
         </div>
@@ -28,7 +29,7 @@
                 <form id="spell_form" method="post" action="{% url 'attack' duel.id %}" style="display: {% if duel.current_turn != user %}none{% else %}block{% endif %};">
                     {% csrf_token %}
                     <div class="input-group mb-3">
-                        <input type="text" name="spell" id="spell_input" class="form-control" placeholder="Enter your spell...">
+                        <input type="text" name="spell" id="spell_input" class="form-control" placeholder="Enter your spell..." autocomplete="off">
                         <button type="submit" class="btn btn-danger">Cast Spell</button>
                     </div>
                 </form>
@@ -47,6 +48,7 @@
                 </form>
             </div>
         </div>
+        </div>
     </div>
 </div>
 
@@ -61,7 +63,7 @@ const spellInput = document.getElementById('spell_input');
 const spellSuggestions = document.createElement('div');
 spellSuggestions.id = 'spell_suggestions';
 spellSuggestions.className = 'list-group';
-spellInput.parentNode.insertBefore(spellSuggestions, spellInput.nextSibling);
+spellInput.closest('.input-group').after(spellSuggestions);
 
 spellInput.addEventListener('input', () => {
     const query = spellInput.value.toLowerCase();

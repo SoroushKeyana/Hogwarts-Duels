@@ -2,9 +2,22 @@
 
 body {
     font-family: 'Lora', serif;
-    background-color: #f0e6d6;
-    background-image: url('https://www.transparenttextures.com/patterns/old-parchment.png');
+    background-image: url('../media/hogwarts.webp');
+    background-size: cover;
+    background-position: center;
     color: #4d3e32;
+    position: relative;
+    z-index: 1;
+}
+
+.body-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
 }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
@@ -41,7 +54,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .btn-primary {
-    background-color: #740001; /* Gryffindor Red */
+    background-color: #740001;
     border-color: #5c0001;
 }
 
@@ -51,7 +64,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .btn-warning {
-    background-color: #d3a625; /* Gryffindor Gold */
+    background-color: #d3a625;
     border-color: #b89120;
     color: #fff;
 }
@@ -62,7 +75,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .btn-danger {
-    background-color: #1a472a; /* Slytherin Green */
+    background-color: #1a472a;
     border-color: #133520;
 }
 
@@ -72,13 +85,13 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 a {
-    color: #0e1a40; /* Ravenclaw Blue */
-    text-decoration: none;
+    color: #0e1a40;
+    text-decoration: underline;
     transition: color 0.2s;
 }
 
 a:hover {
-    color: #946b2d; /* Ravenclaw Bronze */
+    color: #946b2d;
     text-decoration: underline;
 }
 
@@ -97,6 +110,10 @@ a:hover {
 }
 
 
+#spell_form {
+    position: relative;
+}
+
 .footer {
     bottom: 0;
     width: 100%;
@@ -109,9 +126,12 @@ a:hover {
 
 #spell_suggestions {
     position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     z-index: 1000;
-    width: calc(100% - 2rem); /* Adjust based on parent padding */
-    margin-top: -0.5rem;
+    border: 1px solid #d3c8b4;
+    border-top: none;
 }
 
 .list-group-item {
@@ -124,15 +144,14 @@ a:hover {
 }
 
 .badge.bg-success {
-    background-color: #1a472a !important; /* Slytherin Green */
+    background-color: #1a472a !important;
 }
 
 .badge.bg-warning {
-    background-color: #d3a625 !important; /* Gryffindor Gold */
+    background-color: #d3a625 !important;
     color: #fff !important;
 }
 
-/* Sticky Footer Styling */
 html {
     height: 100%;
 }
@@ -145,4 +164,67 @@ body {
 
 main {
     flex-grow: 1;
+}
+
+.houses{
+    background-image: url('../media/houses.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.houses h3{
+    text-shadow: 2px 2px 4px rgba(0,0,0);
+}
+
+.houses-overlay {
+    background-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.houses-list{
+   opacity: 0.8;
+}
+
+.house-image {
+    width: 10%;
+    height: auto;
+}
+
+.profile-house-image {
+    width: 50%;
+    height: auto;
+}
+
+.house-ranking-image {
+    width: 30px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.duel{
+    background-image: url('../media/dueling.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.duel-overlay {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.spell-card {
+    border-left: 5px solid #740001;
+    transition: transform 0.2s;
+}
+
+.spell-card:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 992px) {
+    .list-group-item.d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
 }

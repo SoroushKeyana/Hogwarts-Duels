@@ -342,3 +342,6 @@ def duel_cancelled(request, duel_id):
 def duel_declined_info(request, duel_id):
     duel = get_object_or_404(Duel, id=duel_id)
     return render(request, 'duel_declined.html', {'duel': duel})
+
+def spells_view(request):
+    return render(request, 'spells.html', {'spell_data': SPELL_DATA})
