@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 bg-light p-4 rounded bg-opacity-75">
     <h2>New Duel Challenge!</h2>
     <p>You have been challenged to a duel by {{ duel.challenger.username }}.</p>
     <form action="{% url 'accept_duel' duel.id %}" method="post" style="display: inline;">

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <h2>Active Duels</h2>
-    <ul>
+    <h2 class="text-dark">Active Duels</h2>
+    <ul class="bg-light py-4 px-2  list-unstyled">
         {% for duel in active_duels %}
             <li>
-                Duel: {{ duel.challenger.username }} vs {{ duel.opponent.username }}
+                <b>{{ duel.challenger.username.capitalize }} vs {{ duel.opponent.username.capitalize }}</b>
                 {% if duel.current_turn == user %}
                     <span class="badge bg-success">Your Turn!</span>
                 {% else %}
@@ -22,7 +22,7 @@
         {% endfor %}
     </ul>
 
-    <h2 class="mt-5">Ended Duels</h2>
+    <h2 class="mt-5 text-dark">Ended Duels</h2>
     <table class="table table-striped table-hover">
         <thead>
             <tr>
@@ -36,7 +36,7 @@
             {% for duel in ended_duels %}
             {% if duel.winner %}
             <tr>
-                <td>{{ duel.challenger.username }} vs {{ duel.opponent.username }}</td>
+                <td>{{ duel.challenger.username.capitalize }} vs {{ duel.opponent.username.capitalize }}</td>
                 <td>{{ duel.created_at|date:"M d, Y" }}</td>
                 <td>{{ duel.status|capfirst }}</td>
                 <td>
