@@ -29,7 +29,7 @@ SPELL_DATA = {
     "Rennervate": {"type": "defense", "power": 1, "counters": ["Stupefy"], "description": "Reviving Charm"},
     "Finite Incantatem": {"type": "defense", "power": 3, "counters": ["Petrificus Totalus", "Impedimenta"], "description": "General Counter-Spell"},
 
-    # Utility/Other Spells (can have minor effects or be countered)
+    # Utility/Other Spells that can have minor effects or none
     "Petrificus Totalus": {"type": "utility", "power": 1, "counters": ["Finite Incantatem"], "description": "Full Body-Bind Curse"},
     "Impedimenta": {"type": "utility", "power": 1, "counters": ["Finite Incantatem"], "description": "Impediment Jinx"},
     "Lumos": {"type": "utility", "power": 0, "counters": [], "description": "Wand-Lighting Charm"},
@@ -139,7 +139,7 @@ def start_duel(request, user_id=None):
         if opponent == user:
             return render(request, "dashboard.html", {"error": "You cannot challenge yourself."})
     else:
-        # pick a random opponent should not be the same as the user
+        # pick a random opponent that is not the same as the user
         opponents = User.objects.exclude(id=user.id)
         if not opponents.exists():
             return render(request, "dashboard.html", {"error": "No opponents available for a random duel."})
@@ -209,7 +209,7 @@ def attack(request, duel_id):
         time_since_attack = timezone.now() - duel.last_attack_timestamp
         if time_since_attack > timedelta(seconds=10) or is_timeout:
             # Timeout or explicit timeout signal
-            pass # Full damage
+            pass
         elif not attacking_spell_data.get("unblockable", False):
             if actual_spell_name in attacking_spell_data.get("counters", []):
                 damage_dealt = 0

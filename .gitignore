@@ -18,23 +18,16 @@ venv.bak/
 *.log
 *.pot
 *.pyc
-db.sqlite3
-media/
 
-# If using VSCode:
+
+# VSCode
 .vscode/
 
-# If using PyCharm:
-.idea/
-
-# Static files (you can commit these if you want, but usually not):
+# Static files
 staticfiles/
 
 # Environment variables
 .env
 
-# MacOS files
-.DS_Store
-
-# Node modules (if you use node/npm/yarn)
+# Node modules
 node_modules/

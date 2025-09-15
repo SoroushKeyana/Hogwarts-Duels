@@ -4,7 +4,7 @@
     <h2 class="text-dark">Active Duels</h2>
     <ul class="bg-light py-4 px-2  list-unstyled">
         {% for duel in active_duels %}
-            <li>
+            <li class="d-flex d-md-block">
                 <b>{{ duel.challenger.username.capitalize }} vs {{ duel.opponent.username.capitalize }}</b>
                 {% if duel.current_turn == user %}
                     <span class="badge bg-success">Your Turn!</span>
@@ -17,6 +17,7 @@
                     <button type="submit" class="btn btn-danger btn-sm">End Duel</button>
                 </form>
             </li>
+            <hr>
         {% empty %}
             <li>No active duels.</li>
         {% endfor %}

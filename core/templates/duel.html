@@ -84,7 +84,7 @@ spellInput.addEventListener('input', () => {
         suggestionItem.innerText = spell;
         suggestionItem.addEventListener('click', () => {
             spellInput.value = spell;
-            spellSuggestions.innerHTML = ''; // Clear suggestions
+            spellSuggestions.innerHTML = '';
         });
         spellSuggestions.appendChild(suggestionItem);
     });
@@ -116,7 +116,6 @@ function startDefenseTimer(timestamp) {
         if (distance < 0) {
             clearInterval(defenseTimerInterval);
             timerEl.innerText = "0";
-            // Submit form with timeout
             spellInput.value = '_TIMEOUT_';
             document.getElementById('spell_form').submit();
         } else {
@@ -167,7 +166,7 @@ function checkDuel() {
                     turnText.innerText = "Your turn to Defend!";
                     spellInput.placeholder = "Enter a defense spell...";
                     startDefenseTimer(data.last_attack_timestamp);
-                } else { // attack phase
+                } else { 
                     turnText.innerText = "Your turn to Attack!";
                     spellInput.placeholder = "Enter an attack spell...";
                     stopDefenseTimer();
@@ -180,7 +179,7 @@ function checkDuel() {
             }
         } else if (data.status === 'finished') {
             if (pollingInterval) {
-                clearInterval(pollingInterval); // Stop polling
+                clearInterval(pollingInterval);
             }
             stopDefenseTimer();
             window.location.href = `/duel/${duelId}/`;
@@ -196,7 +195,7 @@ function checkDuel() {
     .catch(err => {
         console.error('Error fetching duel status:', err);
         if (pollingInterval) {
-            clearInterval(pollingInterval); // Stop polling on error
+            clearInterval(pollingInterval);
         }
     });
 }
