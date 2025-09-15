@@ -37,14 +37,31 @@
         <ul class="list-group list-group-flush">
           {% for u in following_users %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <a href="{% url 'profile' u.username %}">{{ u.username }}</a>
+              <div class="d-flex align-items-center">
+                {% if u.userprofile.house == 'Gryffindor' %}
+                  <img src="{% static 'core/media/Gryffindor.webp' %}" alt="House Image" class="house-ranking-image">
+                {% elif u.userprofile.house == 'Hufflepuff' %}
+                  <img src="{% static 'core/media/Hufflepuff.webp' %}" alt="House Image" class="house-ranking-image">
+                {% elif u.userprofile.house == 'Ravenclaw' %}
+                  <img src="{% static 'core/media/Ravenclaw.webp' %}" alt="House Image" class="house-ranking-image">
+                {% elif u.userprofile.house == 'Slytherin' %}
+                  <img src="{% static 'core/media/Slytherin.webp' %}" alt="House Image" class="house-ranking-image">
+                {% endif %}
+                <div>
+                      <a href="{% url 'profile' u.username %}" class="house-font {% if u.userprofile.house == 'Gryffindor' %}gryffindor-text{% elif u.userprofile.house == 'Hufflepuff' %}hufflepuff-text{% elif u.userprofile.house == 'Ravenclaw' %}ravenclaw-text{% elif u.userprofile.house == 'Slytherin' %}slytherin-text{% endif %}">{{ u.username }}</a>
+                       <small class="d-block user-stats">
+                      <span class="wins">Wins: {{ u.userprofile.wins }}</span> | 
+                      <span class="losses">Losses: {{ u.userprofile.losses }}</span>
+                    </small>
+                </div>
+              </div>
               {% if user.is_authenticated and user != u %}
                 <div>
                   <form action="{% url 'start_duel_with_user' u.id %}" method="post" style="display: inline;">
                       {% csrf_token %}
-                      <button type="submit" class="btn btn-sm btn-primary">Challenge</button>
+                      <button type="submit" class="btn btn-xs btn-primary">Challenge</button>
                   </form>
-                  <button class="btn btn-sm btn-danger" onclick="unfollow({{ u.id }}, this)">Unfollow</button>
+                  <button class="btn btn-xs btn-danger" onclick="unfollow({{ u.id }}, this)">Unfollow</button>
                 </div>
               {% endif %}
             </li>
