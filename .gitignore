@@ -23,9 +23,6 @@ venv.bak/
 # VSCode
 .vscode/
 
-# Static files
-staticfiles/
-
 # Environment variables
 .env
 
