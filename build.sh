@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
+# Exit on error
 set -o errexit
 
-# install dependencies (Render will usually run pip based on requirements.txt; keep this to be safe)
+# Install dependencies
 pip install -r requirements.txt
 
-# collect static files (no interactive prompts)
+# Collect static files
 python manage.py collectstatic --no-input
 
-# apply migrations
+# Apply database migrations
 python manage.py migrate

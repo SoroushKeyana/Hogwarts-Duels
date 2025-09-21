@@ -2,6 +2,12 @@
 
 Hogwarts Duels is a dynamic web application built with Python, Django, and JavaScript that allows users to experience the thrill of magical combat. Users can register an account, choose their Hogwarts house, follow other users, and challenge them to live, turn-based duels using a variety of spells. The application features a real-time dueling system, a house points leaderboard, and a social system for finding and challenging friends.
 
+## Live Demo
+
+You can try a live version of the application here: **[hogwarts-duels.onrender.com](https://hogwarts-duels.onrender.com)**
+
+**Note:** The application is hosted on a free service. The initial load may take up to a minute as the server spins up from an idle state.
+
 ## Distinctiveness and Complexity
 
 This project satisfies the distinctiveness and complexity requirements by moving far beyond the scope of a standard social network or e-commerce site. While it incorporates social elements like user search and a follow system, these are secondary features that serve the application's primary purpose: to facilitate a stateful, interactive game. Unlike a social network where the core user activity is creating and consuming static posts, the central loop of Hogwarts Duels involves users engaging in a persistent, multi-step, competitive interaction with a clear win/loss state.
@@ -73,4 +79,3 @@ To run this application on your local machine, follow these steps:
 
 7.  **Access the Application:**
     Open your web browser and navigate to `http://127.0.0.1:8000/`. You can now register a new account and start dueling!
-
